@@ -164,8 +164,10 @@ def show_all_users():
     summary="Show a specific user information",
     tags=["Users"]
     )
-def show_user():
-    pass
+def show_user(
+    
+):
+    
 
 ### Delete specific user
 @app.delete(
@@ -203,7 +205,23 @@ def update_user():
     tags=["Tweets"]
 )
 def home():
-    return {"TwitterAPI":"Works!"}
+    """
+    This path operation show all tweets
+
+    Params:
+
+    Return a json list with all tweet in the app with the following
+    keys:
+    - tweet_id : UUID
+    - email : EmailStr
+    - first_name : str
+    - Lat_name : str
+    - birth_date : date
+    """
+    with open('tweets.json','r', encoding="utf-8") as f:
+        results = json.load(f)
+        return results
+
 
 ### Post a tweet
 @app.post(
