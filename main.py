@@ -1,8 +1,10 @@
 #
+import json
 from uuid import UUID
 from datetime import date
 from datetime import datetime
 from typing import Optional, List
+
 
 # Pydantic
 from pydantic import BaseModel
@@ -12,6 +14,7 @@ from pydantic import Field
 # FastAPI
 from fastapi import FastAPI
 from fastapi import status
+from fastapi import Body
 
 app = FastAPI()
 
@@ -19,7 +22,7 @@ app = FastAPI()
 
 class UserBase(BaseModel):
         # Universal unique identifier
-    user_id: UUID = Field(...)
+    user_id: UUID = Field(...   )
     email: EmailStr = Field(...)
 
 class UserLogin(UserBase):
@@ -27,7 +30,8 @@ class UserLogin(UserBase):
     password: str = Field(
         ...,
         min_length=8,
-        max_length=69
+        max_length=69,
+        example = 'passwor123123'
     )    
 
 class User(UserBase):
@@ -35,23 +39,20 @@ class User(UserBase):
     first_name: str = Field(
         ...,
         min_length=1,
-        max_length=50
+        max_length=50,
+        example= 'Pedro'
     )
     last_name: str = Field(
         ...,
         min_length=1,
-        max_length=50
+        max_length=50,
+        example= "Garcia"
     )
 
-    birth_Date: Optional[date] = Field(default=None)
+    birth_date: Optional[datetime] = Field(default=None)
 
-class UserRegister(User):
-    password: str = Field(
-        ...,
-        min_length=1,
-        max_length=20
-    )
-
+class UserRegister(User, UserLogin):
+    pass
 class Tweet(BaseModel):
     
     tweet_id: UUID = Field(...)
@@ -78,14 +79,44 @@ class Tweet(BaseModel):
     summary="Register a User ",
     tags=["Users"]
     )
-def signup():
+def signup(user: UserRegister = Body(...)):
     """
         This path operation register a User in the app
         
         Params:
-            - Request bodu parameter
-                - user : 
+
+            - Request body parameter
+                - user :  UserRegister
+        
+        Returns a json with basic user information:
+
+            - user_id : UUID
+            - email : EmailStr
+            - first_name : str
+            - Lat_name : str
+            - birth_date : date
     """
+    # To open the json file with r/w 
+    with open("users.json", "r+", encoding="utf-8") as f:
+        # loads recieve a string and return a json's sinil (dict)
+        results = json.load(f)
+        # transf explicitly json to dict
+        user_dict = user.dict()
+        
+        # The kind of types of these can't soport transf
+        # to dict automat, we must do it
+        user_dict["user_id"] = str(user_dict["user_id"])
+        user_dict["birth_date"] = str(user_dict["birth_date"])
+        results.append(user_dict)
+
+        # find the first byte of the file, that prevents us to 
+        # agregg a lot of list
+        f.seek(0)
+        # write a json from results
+        f.write(json.dumps(results))
+
+        # Returns the user and say OK
+        return user 
 
 ### Login a user
 @app.post(
