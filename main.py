@@ -293,9 +293,26 @@ def post(tweet: Tweet = Body(...)):
     summary="Show a tweet ",
     tags=["Tweets"]
     )
-def show_a_tweet():
-    pass
+def show_a_tweet(
+    tweet_id: UUID = Path(
+        ...,
+        example="3fa85f64-5717-4562-b3fc-2c963f66afa2",
+        description="The tweet's id",
 
+    )
+
+):
+    with open("tweets.json", "r+", encoding="utf-8") as f:
+        results = json.load(f)
+        id = str(tweet_id)
+        for data in results:
+            if data["tweet_id"] == id:
+                return data
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"¡This tweet_id doesn't exist!"
+            )
 
 ### Delete a tweet
 @app.delete(
