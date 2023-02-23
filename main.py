@@ -45,6 +45,13 @@ class User(UserBase):
 
     birth_Date: Optional[date] = Field(default=None)
 
+class UserRegister(User):
+    password: str = Field(
+        ...,
+        min_length=1,
+        max_length=20
+    )
+
 class Tweet(BaseModel):
     
     tweet_id: UUID = Field(...)
@@ -72,7 +79,13 @@ class Tweet(BaseModel):
     tags=["Users"]
     )
 def signup():
-    pass
+    """
+        This path operation register a User in the app
+        
+        Params:
+            - Request bodu parameter
+                - user : 
+    """
 
 ### Login a user
 @app.post(
