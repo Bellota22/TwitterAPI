@@ -12,9 +12,9 @@ from pydantic import EmailStr
 from pydantic import Field
 
 # FastAPI
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi import status
-from fastapi import Body
+from fastapi import Body, Path
 
 app = FastAPI()
 
@@ -165,8 +165,25 @@ def show_all_users():
     tags=["Users"]
     )
 def show_user(
-    
+    user_id: UUID = Path(
+        ...,
+        description="The user's id",
+        example= "3fa85f64-5717-4562-b3fc-2c963f66afa2"),
+
 ):
+    with open("users.json", "r+", encoding="utf-8") as f: 
+        results = json.loads(f.read())
+        id = str(user_id)
+        for data in results:
+            if data["user_id"] == id:
+                return data
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"¡This user_id doesn't exist!"
+            )
+    
+
     
 
 ### Delete specific user
