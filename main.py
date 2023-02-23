@@ -17,7 +17,6 @@ from fastapi import status
 from fastapi import Body, Path, Form
 from fastapi.responses import JSONResponse
 
-from tokens.jwt_manager import create_token
 
 app = FastAPI()
 
