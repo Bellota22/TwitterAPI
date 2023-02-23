@@ -15,6 +15,9 @@ from pydantic import Field
 from fastapi import FastAPI, HTTPException
 from fastapi import status
 from fastapi import Body, Path, Form
+from fastapi.responses import JSONResponse
+
+from tokens.jwt_manager import create_token
 
 app = FastAPI()
 
@@ -65,6 +68,9 @@ class Tweet(BaseModel):
     updated_at: Optional[datetime] = Field(default= None)
     by: User = Field(...)
 
+class LoginOut(BaseModel): 
+    email: EmailStr = Field(...)
+    message: str = Field(default="Login Successfully!")
 # Path operation
 
 
@@ -121,13 +127,23 @@ def signup(user: UserRegister = Body(...)):
 ### Login a user
 @app.post(
     path='/login',
-    response_model=User,
+    response_model=LoginOut,
     status_code=status.HTTP_200_OK,
     summary="Login a User ",
-    tags=["Users"]
+    tags=["auth"]
     )
-def login():
-    pass
+def login(
+    email: EmailStr = Form(...),
+    password: str = Form(...)
+):
+    with open("users.json", "r+", encoding="utf-8") as f: 
+            datos = json.loads(f.read())
+            for user in datos:
+                if email == user['email'] and password == user['password']:
+                    return LoginOut(email=email)
+                else:
+                    return LoginOut(email=email, message="Login Unsuccessfully!")
+
 
 ### Show all user
 @app.get(
